@@ -125,7 +125,7 @@ class Driver:
         self.target_location=None
         self.status = DriverStatus.Delivered
         self.status = DriverStatus.Idel
-        logging.info("Driver "+str(id)+" Delivered Order "+ str(self.order.id)+" at "+ str(datetime.datetime.now()))
+        logging.info("Driver "+str(self.id)+" Delivered Order "+ str(self.order.id)+" at "+ str(datetime.datetime.now()))
 
 
     def get_driver_access_time(self,target_location):
