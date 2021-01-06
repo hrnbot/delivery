@@ -129,7 +129,7 @@ class Driver:
         self.target_location = self.order.delivery_location
         self.status = DriverStatus.Picked_up_order
         self.driver_free_time = datetime_to_seconds(datetime.datetime.now()) + self.order.time_r2d
-        logging.info("Driver " + str(id) + " Picked up Order " + str(self.order.id) + " at " + str(
+        logging.info("Driver " + str(self.id) + " Picked up Order " + str(self.order.id) + " at " + str(
             datetime.datetime.now()) + " expected Delivery at " + str(datetime_from_timestamp(self.driver_free_time)))
 
     def order_delivered(self):
