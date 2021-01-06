@@ -165,7 +165,7 @@ class Restaurant:
     def give_all_drivers_sorted(self):
         drivers_dict = dict()
         for i, driver in enumerate(self.list_of_drivers):
-            print(driver.status)
+            # print(driver.status)
             if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order:
                 drivers_dict[i] = driver.get_driver_access_time(self.location) + self.service_delay
         # print("All Driver ",drivers_dict)
@@ -179,7 +179,7 @@ class Orders:
         is_correct_date = False
         self.driver = None
         is_correct_location = False
-        order_log = "Id"+str(self.id)+"\n"
+        order_log = "Id "+str(self.id)+"\n"
         while not is_correct_location:
             try:
                 lat = input("Input Latitude between 0 to n where n is in meters : ")
@@ -282,12 +282,14 @@ def manage_order(order):
     driver_index = None
     drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
     for t_driver in drivers_index:
+        # print(restaurants[order.restaurant_index].list_of_drivers[t_driver].status)
         while restaurants[order.restaurant_index].list_of_drivers[t_driver].status!=DriverStatus.Idel:
-            is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
-            # logging.info()
-            if is_accepted:
-                driver_index = t_driver
-                break
+            time.sleep(5)
+        is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
+        # logging.info()
+        if is_accepted:
+            driver_index = t_driver
+            break
     if driver_index == None:
         print("No Driver Accepted order of :" + str(order.id))
     else:
