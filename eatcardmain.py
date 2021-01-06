@@ -322,8 +322,7 @@ def manage_order_driver():
             if order.pickup_time - datetime_to_seconds(datetime.datetime.now()) > check_order_thresold:
                 break
             else:
-                drivers_of_restaurant=restaurants[order.restaurant_index].list_of_drivers[
-                    restaurants[order.restaurant_index].give_all_drivers_sorted()]
+                drivers_of_restaurant=restaurants[order.restaurant_index].give_all_drivers_sorted()
                 if len(drivers_of_restaurant)>0:
                     driver_first = drivers_of_restaurant[0]
                     print(driver_first)
