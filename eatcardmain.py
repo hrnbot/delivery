@@ -229,7 +229,7 @@ class Orders:
                         avg_buffer_time = average_buffer_time
                         r2dtime = self.time_r2d
                         new_delivery_time = current_time + service_delay + prep_time + avg_buffer_time + r2dtime
-                        order_log += "Delivery time  Expected" + str(datetime_from_timestamp(new_delivery_time)) + " Service Delay " + str(
+                        order_log += "Delivery time  Expected " + str(datetime_from_timestamp(new_delivery_time)) + " Service Delay " + str(
                             service_delay) + " Prep Time " + str(prep_time) + " Buffer time " + str(
                             avg_buffer_time) + " Restaurant to Door" + str(r2dtime) + "\n"
 
