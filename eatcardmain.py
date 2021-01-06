@@ -165,7 +165,7 @@ class Restaurant:
     def give_all_drivers_sorted(self):
         drivers_dict = dict()
         for i, driver in enumerate(self.list_of_drivers):
-            # print(driver.status)
+            print(driver.status)
             if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order:
                 drivers_dict[i] = driver.get_driver_access_time(self.location) + self.service_delay
         # print("All Driver ",drivers_dict)
