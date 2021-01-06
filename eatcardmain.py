@@ -322,19 +322,22 @@ def manage_order_driver():
             if order.pickup_time - datetime_to_seconds(datetime.datetime.now()) > check_order_thresold:
                 break
             else:
-                driver_first = restaurants[order.restaurant_index].list_of_drivers[
-                    restaurants[order.restaurant_index].give_all_drivers_sorted()[0]]
-                print(driver_first)
-                print("First Driver Free time ", str(datetime_from_timestamp(
-                    driver_first.get_driver_access_time(restaurants[order.restaurant_index].location))),
-                      " Pickup Time " + str(
-                          datetime_from_timestamp(order.pickup_time + driver_request_difference_time)))
-                if driver_first.get_driver_access_time(restaurants[
-                                                           order.restaurant_index].location) < order.pickup_time + driver_request_difference_time:
-                    th = threading.Thread(target=manage_order, args=(order,))
-                    orders.remove(order)
-                    th.start()
-                    all_threads.append(th)
+                drivers_of_restaurant=restaurants[order.restaurant_index].list_of_drivers[
+                    restaurants[order.restaurant_index].give_all_drivers_sorted()]
+                if len(drivers_of_restaurant)>0:
+                    driver_first = drivers_of_restaurant[0]
+                    print(driver_first)
+                    print("First Driver Free time ", str(datetime_from_timestamp(
+                        driver_first.get_driver_access_time(restaurants[order.restaurant_index].location))),
+                          " Pickup Time " + str(
+                              datetime_from_timestamp(order.pickup_time + driver_request_difference_time)))
+                    if driver_first.get_driver_access_time(restaurants[
+                                                               order.restaurant_index].location) < order.pickup_time + driver_request_difference_time:
+                        th = threading.Thread(target=manage_order, args=(order,))
+                        orders.remove(order)
+                        th.start()
+                        all_threads.append(th)
+                write_in_order("Order "+str(order.id)+" Is Delayed because all Drivers are Busy")
             time.sleep(1)
         time.sleep(manage_order_time)
 
