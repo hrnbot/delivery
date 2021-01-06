@@ -96,7 +96,8 @@ class Driver:
         self.order = None
 
     def request_for_food_delivery(self, order):
-        self.status = DriverStatus.Got_Request
+        if self.status==DriverStatus.Idel:
+            self.status = DriverStatus.Got_Request
         logging.info(str(self.id) + " " + " got request of order " + str(order.id))
         r_time = datetime_to_seconds(datetime.datetime.now()) + 120
         is_accepted = False
@@ -118,7 +119,8 @@ class Driver:
             # break
         else:
             logging.info(str(self.id) + " Driver declined Order" + str(order.id))
-            self.status = DriverStatus.Idel
+            if self.status == DriverStatus.Got_Request:
+                self.status = DriverStatus.Idel
             # break
             # time.sleep(driver_ping_display)
         return is_accepted
@@ -280,11 +282,12 @@ def manage_order(order):
     driver_index = None
     drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
     for t_driver in drivers_index:
-        is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
-        # logging.info()
-        if is_accepted:
-            driver_index = t_driver
-            break
+        while restaurants[order.restaurant_index].list_of_drivers[t_driver].status!=DriverStatus.Idel:
+            is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
+            # logging.info()
+            if is_accepted:
+                driver_index = t_driver
+                break
     if driver_index == None:
         print("No Driver Accepted order of :" + str(order.id))
     else:
