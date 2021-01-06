@@ -324,7 +324,7 @@ def manage_order_driver():
             else:
                 drivers_of_restaurant=restaurants[order.restaurant_index].give_all_drivers_sorted()
                 if len(drivers_of_restaurant)>0:
-                    driver_first = drivers_of_restaurant[0]
+                    driver_first = restaurants[order.restaurant_index].list_of_drivers[drivers_of_restaurant[0]]
                     print(driver_first)
                     print("First Driver Free time ", str(datetime_from_timestamp(
                         driver_first.get_driver_access_time(restaurants[order.restaurant_index].location))),
