@@ -60,7 +60,7 @@ def distance_in_meters(location1,location2):
 class Food:
     def __init__(self,prep_time):
         self.id=names.get_last_name()
-        self.prep_time=prep_time
+        self.prep_time=prep_time*60
 
     def get_time(self):
         return self.prep_time
