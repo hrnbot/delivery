@@ -96,10 +96,10 @@ class Driver:
         self.order = None
 
     def request_for_food_delivery(self, order):
+        self.status = DriverStatus.Got_Request
         logging.info(str(self.id) + " " + " got request of order " + str(order.id))
         r_time = datetime_to_seconds(datetime.datetime.now()) + 120
         is_accepted = False
-        self.status = DriverStatus.Got_Request
         # while (r_time > 0):
         wait_time = random.randint(0, 120)
         # logging.info("wait time for Driver "+)
@@ -163,8 +163,10 @@ class Restaurant:
     def give_all_drivers_sorted(self):
         drivers_dict = dict()
         for i, driver in enumerate(self.list_of_drivers):
-            if driver.status == DriverStatus.Idel or DriverStatus.Picked_up_order:
+            print(driver.status)
+            if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order:
                 drivers_dict[i] = driver.get_driver_access_time(self.location) + self.service_delay
+        print("All Driver ",drivers_dict)
         list_of_indexed_driver_sorted = [i[0] for i in sorted(drivers_dict.items(), key=lambda x: x[1])]
         return [i for i in list_of_indexed_driver_sorted]
 
@@ -211,7 +213,7 @@ class Orders:
                     r2dtime = self.time_r2d
                     new_delivery_time = current_time + service_delay + prep_time + avg_buffer_time + r2dtime
                     self.expected_delivery_time = new_delivery_time
-                    order_log += "Delivery time  Expected" + str(new_delivery_time) + " Service Delay " + str(
+                    order_log += "Delivery time Expected " + str(datetime_from_timestamp(new_delivery_time)) + " Service Delay " + str(
                         service_delay) + " Prep Time " + str(prep_time) + " Buffer time " + str(
                         avg_buffer_time) + " Restaurant to Door" + str(r2dtime) + "\n"
                     # self.expected_delivery_time= )+restaurants[restaurant_index].service_delay+restaurants[restaurant_index].list_of_foods[food_index].prep_time+average_buffer_time+self.time_r2d
@@ -229,7 +231,7 @@ class Orders:
                         avg_buffer_time = average_buffer_time
                         r2dtime = self.time_r2d
                         new_delivery_time = current_time + service_delay + prep_time + avg_buffer_time + r2dtime
-                        order_log += "Delivery time  Expected " + str(datetime_from_timestamp(new_delivery_time)) + " Service Delay " + str(
+                        order_log += "Delivery time Expected  " + str(datetime_from_timestamp(new_delivery_time)) + " Service Delay " + str(
                             service_delay) + " Prep Time " + str(prep_time) + " Buffer time " + str(
                             avg_buffer_time) + " Restaurant to Door" + str(r2dtime) + "\n"
 
@@ -264,7 +266,7 @@ def create_foods(number_of_foods):
 
 
 def create_drivers(number_of_drivers):
-    return [Driver(location=(random.randint(0, 20), random.randint(0, 20))) for i in range(number_of_drivers)]
+    return [Driver(location=(random.randint(0, 100), random.randint(0, 100))) for i in range(number_of_drivers)]
 
 
 def create_Restaurants(number_of_restaurants, list_of_drivers):
@@ -274,9 +276,9 @@ def create_Restaurants(number_of_restaurants, list_of_drivers):
 
 def manage_order(order):
     # print()
-    drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
     is_accepted = False
     driver_index = None
+    drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
     for t_driver in drivers_index:
         is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
         # logging.info()
@@ -310,7 +312,7 @@ def manage_order(order):
 def manage_order_driver():
     global orders
     while True:
-        logging.info([datetime_from_timestamp(i.expected_delivery_time) for i in orders])
+        # logging.info([datetime_from_timestamp(i.expected_delivery_time) for i in orders])
         for order in orders:
             if order.pickup_time - datetime_to_seconds(datetime.datetime.now()) > check_order_thresold:
                 break
@@ -328,6 +330,7 @@ def manage_order_driver():
                     orders.remove(order)
                     th.start()
                     all_threads.append(th)
+            time.sleep(1)
         time.sleep(manage_order_time)
 
 
@@ -406,7 +409,7 @@ if __name__ == '__main__':
     open("restaurant.log", "w+")
     open("order.log", "w+")
     # print(create_foods(5)[0].prep_time)
-    drivers = create_drivers(12)
+    drivers = create_drivers(4)
     restaurants = create_Restaurants(5, drivers)
     th_manage_driver = threading.Thread(target=manage_order_driver)
     th_view_driver = threading.Thread(target=view_driver)
