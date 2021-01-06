@@ -6,6 +6,7 @@ import logging
 import names
 import time
 import threading
+import os
 from collections import OrderedDict
 logging.basicConfig(filename='log.log', level=logging.DEBUG)
 
@@ -136,9 +137,16 @@ class Driver:
 class Restaurant:
     def __init__(self,list_of_foods,list_of_drivers,location):
         self.id=names.get_first_name()
+        write_in_food(20*"=="+"\n")
+        write_in_food("Restaurant:"+str(self.id)+"\n")
         self.list_of_foods=list_of_foods
+        for food in self.list_of_foods:
+            write_in_food("Food:"+str(food.id) + "\n")
+            write_in_food("Prep time:"+str(food.prep_time) + "\n")
         self.list_of_drivers=list_of_drivers
         self.location=location
+        write_in_food("Location"+str(self.location)+"\n")
+        write_in_food(20*"=="+"\n")
         self.service_delay=120 #service delay in seconds
 
     def give_all_drivers_sorted(self):
@@ -172,7 +180,7 @@ class Orders:
         while not is_correct_date:
             try:
                 date_and_time=input("Input Expected Delivery Date time in format of YYYY-MM-DD-HH-MM  enter 'i' for immediate delivery\n Example=> 2021-01-06-23-59 \n")
-                date_and_time="2021-1-5-19-40"
+                # date_and_time="2021-1-5-19-40"
                 if date_and_time=="i":
                     self.expected_delivery_time= datetime_to_seconds(datetime.datetime.now())+restaurants[restaurant_index].service_delay+restaurants[restaurant_index].list_of_foods[food_index].prep_time+average_buffer_time+self.time_r2d
                     print("Delivery Date Immediate")
@@ -208,7 +216,7 @@ def create_drivers(number_of_drivers):
     return [Driver(location=(random.randint(0,20),random.randint(0,20))) for i in range(number_of_drivers) ]
 
 def create_Restaurants(number_of_restaurants,list_of_drivers):
-    return [Restaurant(list_of_drivers=list_of_drivers,list_of_foods=create_foods(random.randint(5,8)),location=(random.randint(0,20),random.randint(0,20)))for i in range(number_of_restaurants) ]
+    return [Restaurant(list_of_drivers=list_of_drivers,list_of_foods=create_foods(random.randint(5,8)),location=(random.randint(0,10000),random.randint(0,10000)))for i in range(number_of_restaurants) ]
 
 def manage_order(order):
     # print()
@@ -257,10 +265,17 @@ def manage_order_driver():
         time.sleep(manage_order_time)
 
 def write_in_driver(text):
-    f=open("driver.log","w+")
+    f=open("driver.log","a")
     f.write(20*"=="+"\n")
     f.write(text+"\n")
     f.write(20*"=="+"\n")
+    f.close()
+
+def write_in_food(text):
+    f = open("restaurant.log", "a")
+    # f.write(20 * "==" + "\n")
+    f.write(text)
+    # f.write(20 * "==" + "\n")
     f.close()
 
 def view_driver():
@@ -310,6 +325,8 @@ def view_order():
             print("Incorrect Retaurant")
 
 if __name__ == '__main__':
+    f=open("driver.log","w+")
+    f=open("restaurant.log","w+")
     print(create_foods(5)[0].prep_time)
     drivers=create_drivers(12)
     global restaurants
@@ -329,6 +346,9 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     finally:
+        os.remove("log.log")
+        os.remove("driver.log")
+        os.remove("restaurant.log")
         # print("Joined")
         for thr in all_threads:
             if thr. is_alive():
