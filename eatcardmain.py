@@ -336,7 +336,8 @@ def manage_order_driver():
                         orders.remove(order)
                         th.start()
                         all_threads.append(th)
-                write_in_order("Order "+str(order.id)+" Is Delayed because all Drivers are Busy")
+                else:
+                    write_in_order("Order "+str(order.id)+" Is Delayed because all Drivers are Busy")
             time.sleep(1)
         time.sleep(manage_order_time)
 
