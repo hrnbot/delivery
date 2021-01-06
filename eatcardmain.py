@@ -20,7 +20,7 @@ check_order_thresold=3600 #1hour
 all_threads=[]
 driver_ping_display=5
 manage_order_time=5
-driver_request_difference_time=120
+driver_request_difference_time=0
 
 def Add_order(order):
     global orders
@@ -96,7 +96,7 @@ class Driver:
         wait_time=random.randint(0,120)
         # logging.info("wait time for Driver "+)
         time.sleep(wait_time)
-        numberList = ["a","b"]
+        numberList = ["a","d"]
         driver_key= random.choices(numberList, weights=(50,50), k=1)
         logging.info(driver_key)
         if  "a" in driver_key:
@@ -125,6 +125,7 @@ class Driver:
         self.target_location=None
         self.status = DriverStatus.Delivered
         self.status = DriverStatus.Idel
+        self.driver_free_time=datetime_to_seconds(datetime.datetime.now())
         logging.info("Driver "+str(self.id)+" Delivered Order "+ str(self.order.id)+" at "+ str(datetime.datetime.now()))
 
 
@@ -152,7 +153,7 @@ class Restaurant:
     def give_all_drivers_sorted(self):
         drivers_dict=dict()
         for i,driver in enumerate(self.list_of_drivers):
-            if driver.status==DriverStatus.Idel or DriverStatus.Going_for_pickup:
+            if driver.status==DriverStatus.Idel or DriverStatus.Picked_up_order:
                 drivers_dict[i]=driver.get_driver_access_time(self.location)+self.service_delay
         list_of_indexed_driver_sorted=[i[0] for i in sorted(drivers_dict.items(), key=lambda x: x[1])]
         return [i for i in list_of_indexed_driver_sorted]
@@ -163,6 +164,7 @@ class Orders:
         is_correct_date=False
         self.driver=None
         is_correct_location = False
+        order_log=""
         while not is_correct_location:
             try:
                 lat = input("Input Latitude between 0 to n where n is in meters : ")
@@ -174,26 +176,50 @@ class Orders:
         self.restaurant_location = restaurants[restaurant_index].location
         self.distance_r2d = math.sqrt((self.restaurant_location[0] - self.delivery_location[0]) ** 2 + (self.restaurant_location[1] - self.delivery_location[1]) ** 2)
         self.time_r2d = ((self.distance_r2d / average_speed) + restaurants[restaurant_index].service_delay + average_buffer_time)
-
         self.restaurant_index = restaurant_index
         self.food_index = food_index
+        order_log += "Restaurant_Location " + str(self.restaurant_location) + "\n"
+        order_log += "Restaurant to Home Distance " + str(self.distance_r2d) + "\n"
+        order_log += "Restaurant to Home Time in seconds " + str(self.time_r2d) + " TravelTime " + str(
+            self.distance_r2d / average_speed) + " Service Delay " + str(
+            restaurants[restaurant_index].service_delay) + " Buffer Time " + str(average_buffer_time) + "\n"
+
         while not is_correct_date:
             try:
                 date_and_time=input("Input Expected Delivery Date time in format of YYYY-MM-DD-HH-MM  enter 'i' for immediate delivery\n Example=> 2021-01-06-23-59 \n")
                 # date_and_time="2021-1-5-19-40"
                 if date_and_time=="i":
-                    self.expected_delivery_time= datetime_to_seconds(datetime.datetime.now())+restaurants[restaurant_index].service_delay+restaurants[restaurant_index].list_of_foods[food_index].prep_time+average_buffer_time+self.time_r2d
                     print("Delivery Date Immediate")
+                    current_time = datetime_to_seconds(datetime.datetime.now())
+                    service_delay = restaurants[restaurant_index].service_delay
+                    prep_time = restaurants[restaurant_index].list_of_foods[food_index].prep_time
+                    avg_buffer_time = average_buffer_time
+                    r2dtime = self.time_r2d
+                    new_delivery_time = current_time + service_delay + prep_time + avg_buffer_time + r2dtime
+                    self.expected_delivery_time = new_delivery_time
+                    order_log += "Delivery time  Expected" + new_delivery_time +" Service Delay "+str(service_delay) +" Prep Time "+str(prep_time) +" Buffer time "+str(avg_buffer_time)+" Restaurant to Door"+str(r2dtime)+"\n"
+                    # self.expected_delivery_time= )+restaurants[restaurant_index].service_delay+restaurants[restaurant_index].list_of_foods[food_index].prep_time+average_buffer_time+self.time_r2d
                 else:
                     list_split=date_and_time.split("-")
                     self.expected_delivery_time=datetime_to_seconds(datetime.datetime(int(list_split[0]),int(list_split[1]),int(list_split[2]),int(list_split[3]),int(list_split[4])))
                     # print("TIming",str(datetime.datetime.now()), datetime_from_timestamp(self.expected_delivery_time )
                     if ( self.expected_delivery_time -datetime_to_seconds(datetime.datetime.now())< check_order_thresold):
-                        new_delivery_time= datetime_to_seconds(datetime.datetime.now())+restaurants[restaurant_index].service_delay+restaurants[restaurant_index].list_of_foods[food_index].prep_time+average_buffer_time+self.time_r2d
-                        print("Your Order cannot be delivered at "+str(datetime_from_timestamp( self.expected_delivery_time)) +" and it is Converted to Immediate order")
+                        current_time=datetime_to_seconds(datetime.datetime.now())
+                        service_delay= restaurants[restaurant_index].service_delay
+                        prep_time=restaurants[restaurant_index].list_of_foods[food_index].prep_time
+                        avg_buffer_time= average_buffer_time
+                        r2dtime=self.time_r2d
+                        new_delivery_time=current_time+service_delay+prep_time+avg_buffer_time+r2dtime
+                        order_log += "Delivery time  Expected" + new_delivery_time + " Service Delay " + str(
+                            service_delay) + " Prep Time " + str(prep_time) + " Buffer time " + str(
+                            avg_buffer_time) + " Restaurant to Door" + str(r2dtime) + "\n"
+
                         self.expected_delivery_time=new_delivery_time
+                        print("Your Order cannot be delivered at " + str(datetime_from_timestamp(self.expected_delivery_time)) + " and it is Converted to Immediate order")
                     else:
                         print("Delivery Date",self.expected_delivery_time)
+                        order_log += "Delivery Date Pre Order " + str(datetime_from_timestamp(self.expected_delivery_time)) + "\n"
+
                 is_correct_date=True
             except Exception as e:
                 print(e)
@@ -201,6 +227,7 @@ class Orders:
 
         print("DSfsd")
         self.pickup_time=self.expected_delivery_time -self.time_r2d
+        order_log += "Pickup time "+str(self.pickup_time)+"\n"
         print("adf")
         # self.pickup_time=
         # self.predicted_delivery_time=
@@ -208,6 +235,7 @@ class Orders:
         print("Your Food " + str(
             restaurants[restaurant_index].list_of_foods[food_index].id) + " From Restaurant " + str(
             restaurants[restaurant_index].id) + " is Ordered at  "+str(self.order_time)  )
+        write_in_order(order_log)
 
 def create_foods(number_of_foods):
     return [Food(random.randint(5,30)) for i in range(number_of_foods) ]
@@ -237,7 +265,6 @@ def manage_order(order):
                 logging.info("Pickup Time "+str(datetime_from_timestamp(order.pickup_time)) +str(datetime.datetime.now()))
                 while(order.pickup_time >= datetime_to_seconds(datetime.datetime.now())):
                     time.sleep(driver_ping_display)
-                    # logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Pickup Time "+str(datetime_from_timestamp(order.pickup_time)))
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
                 logging.info("Delivery Time "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now()))+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)) +str(datetime.datetime.now()))
                 while (restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now())):
@@ -256,13 +283,20 @@ def manage_order_driver():
             else:
                 driver_first=restaurants[order.restaurant_index].list_of_drivers[restaurants[order.restaurant_index].give_all_drivers_sorted()[0]]
                 print(driver_first)
-                print("in else",driver_first.get_driver_access_time(restaurants[order.restaurant_index].location) <order.pickup_time +driver_request_difference_time,datetime_from_timestamp(driver_first.get_driver_access_time(restaurants[order.restaurant_index].location)) ,datetime_from_timestamp(order.pickup_time +driver_request_difference_time))
+                print("First Driver Free time ",str(datetime_from_timestamp(driver_first.get_driver_access_time(restaurants[order.restaurant_index].location))) ," Pickup Time "+str(datetime_from_timestamp(order.pickup_time +driver_request_difference_time)))
                 if driver_first.get_driver_access_time(restaurants[order.restaurant_index].location) <order.pickup_time +driver_request_difference_time:
                     th=threading.Thread(target=manage_order,args=(order,))
                     orders.remove(order)
                     th.start()
                     all_threads.append(th)
         time.sleep(manage_order_time)
+
+def write_in_order(text):
+    f=open("order.log","a")
+    f.write(20 * "==" + "\n")
+    f.write(text + "\n")
+    f.write(20 * "==" + "\n")
+    f.close()
 
 def write_in_driver(text):
     f=open("driver.log","a")
@@ -292,8 +326,6 @@ def view_driver():
                 text+=str(driver.order) +"\n"
                 write_in_driver(text)
                 time.sleep(1)
-
-
 
 def view_order():
     order_status=False
@@ -327,7 +359,8 @@ def view_order():
 if __name__ == '__main__':
     f=open("driver.log","w+")
     f=open("restaurant.log","w+")
-    print(create_foods(5)[0].prep_time)
+    f=open("order.log","w+")
+    # print(create_foods(5)[0].prep_time)
     drivers=create_drivers(12)
     global restaurants
     restaurants=create_Restaurants(5,drivers)
@@ -348,6 +381,7 @@ if __name__ == '__main__':
     finally:
         os.remove("log.log")
         os.remove("driver.log")
+        os.remove("order.log")
         os.remove("restaurant.log")
         # print("Joined")
         for thr in all_threads:
