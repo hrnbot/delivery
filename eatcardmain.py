@@ -237,12 +237,12 @@ def manage_order(order):
                 logging.info("Pickup Time "+str(datetime_from_timestamp(order.pickup_time)) +str(datetime.datetime.now()))
                 while(order.pickup_time >= datetime_to_seconds(datetime.datetime.now())):
                     time.sleep(driver_ping_display)
-                    logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Pickup Time "+str(datetime_from_timestamp(order.pickup_time)))
+                    # logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Pickup Time "+str(datetime_from_timestamp(order.pickup_time)))
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
                 logging.info("Delivery Time "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now()))+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)) +str(datetime.datetime.now()))
                 while (restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now())):
                     time.sleep(driver_ping_display)
-                    logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Delivery Time "+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)))
+                    # logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Delivery Time "+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)))
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_delivered()
             time.sleep(driver_ping_display)
 
