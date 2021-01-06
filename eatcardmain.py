@@ -168,7 +168,7 @@ class Restaurant:
             print(driver.status)
             if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order:
                 drivers_dict[i] = driver.get_driver_access_time(self.location) + self.service_delay
-        print("All Driver ",drivers_dict)
+        # print("All Driver ",drivers_dict)
         list_of_indexed_driver_sorted = [i[0] for i in sorted(drivers_dict.items(), key=lambda x: x[1])]
         return [i for i in list_of_indexed_driver_sorted]
 
@@ -179,7 +179,7 @@ class Orders:
         is_correct_date = False
         self.driver = None
         is_correct_location = False
-        order_log = ""
+        order_log = "Id"+str(self.id)+"\n"
         while not is_correct_location:
             try:
                 lat = input("Input Latitude between 0 to n where n is in meters : ")
@@ -252,7 +252,7 @@ class Orders:
 
         print("DSfsd")
         self.pickup_time = self.expected_delivery_time - self.time_r2d
-        order_log += "Pickup time " + str(self.pickup_time) + "\n"
+        order_log += "Pickup time " + str(datetime_from_timestamp(self.pickup_time)) + "\n"
         print("adf")
         # self.pickup_time=
         # self.predicted_delivery_time=
@@ -380,7 +380,10 @@ def view_driver():
 def view_order():
     order_status = False
     global restaurants
+
     while not order_status:
+        # print()
+
         for i, restaurant in enumerate(restaurants):
             print("Press " + str(i) + "  for " + str(restaurant.id) + " Restaurant")
         print("Press e to Exit")
