@@ -144,7 +144,7 @@ class Driver:
         if distance_in_meters(temp_location,self.target_location)<=1:
             temp_location=self.target_location
         self.location=temp_location
-        print(temp_location,self.target_location,self.location)
+        # print(temp_location,self.target_location,self.location)
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
@@ -359,7 +359,7 @@ def manage_order(order):
                 driver_index].status == DriverStatus.Going_for_pickup:
                 logging.info(
                     "Pickup Time " + str(datetime_from_timestamp(order.pickup_time)) + str(datetime.datetime.now()))
-                print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
+                # print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
                 while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached():
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
                     print("update")
