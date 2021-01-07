@@ -14,7 +14,7 @@ logging.basicConfig(filename='log.log', level=logging.DEBUG)
 orders = []
 global restaurants
 
-average_speed = 1  # m/s
+average_speed = 1.5  # m/s
 average_buffer_time = 30  # seconds
 check_order_thresold = 3600  # 1hour
 all_threads = []
