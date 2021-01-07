@@ -144,6 +144,7 @@ class Driver:
         if distance_in_meters(temp_location,self.target_location)<=1:
             temp_location=self.target_location
         self.location=temp_location
+        print(temp_location,self.target_location,self.location)
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
@@ -444,6 +445,7 @@ def view_driver():
                 text += str(driver.order) + "\n"
                 write_in_driver(text)
                 time.sleep(1)
+            break
 
 
 def view_order():
