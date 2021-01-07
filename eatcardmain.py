@@ -89,9 +89,9 @@ class Driver:
         self.target_location = None
         self.status = DriverStatus.Idel
         self.driver_speed = driver_speed  # in meter per seconds
-        self.buffer_request_time = 120  # in Seconds
+        self.buffer_request_time = 30  # in Seconds
         self.driver_free_time = datetime_to_seconds(datetime.datetime.now())
-        self.driver_rest_time = 360
+        self.driver_rest_time =30
         # self.got_request=False
         self.order = None
 
@@ -160,7 +160,7 @@ class Restaurant:
         self.location = location
         write_in_food("Location" + str(self.location) + "\n")
         write_in_food(20 * "==" + "\n")
-        self.service_delay = 120  # service delay in seconds
+        self.service_delay = 30  # service delay in seconds
 
     def give_all_drivers_sorted(self):
         drivers_dict = dict()
