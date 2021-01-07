@@ -52,11 +52,11 @@ def get_first_driver_free_time(restaurant_index,target_location):
     drivers_of_restaurant = restaurants[restaurant_index].give_all_drivers_sorted()
     if len(drivers_of_restaurant) > 0:
         driver_first = restaurants[restaurant_index].list_of_drivers[drivers_of_restaurant[0]]
-        return driver_first.get_driver_access_time(target_location) -datetime_to_seconds(datetime.datetime.now())
+        return driver_first.get_driver_reach_time(target_location) - datetime_to_seconds(datetime.datetime.now())
     else:
         drivers_of_restaurant = restaurants[restaurant_index].give_all_drivers_sorted(all_driver=True)
         driver_first = restaurants[restaurant_index].list_of_drivers[drivers_of_restaurant[0]]
-        return driver_first.get_driver_access_time(target_location)-datetime_to_seconds(datetime.datetime.now())
+        return driver_first.get_driver_reach_time(target_location) - datetime_to_seconds(datetime.datetime.now())
 
 def Add_order(order):
     global orders
@@ -150,7 +150,7 @@ class Driver:
             self.target_location = order.restaurant_location
             self.status = DriverStatus.Going_for_pickup
             # self.next_ping_time=get_driver_access_time(self.target_location)
-            self.driver_free_time = self.get_driver_access_time(self.target_location) + order.time_r2d
+            self.driver_free_time = self.get_driver_reach_time(self.target_location) + order.time_r2d
             self.order = order
             # break
         else:
@@ -178,7 +178,7 @@ class Driver:
         logging.info(
             "Driver " + str(self.id) + " Delivered Order " + str(self.order.id) + " at " + str(datetime.datetime.now()))
 
-    def get_driver_access_time(self, target_location):
+    def get_driver_reach_time(self, target_location):
         if self.status == DriverStatus.Idel:
             self.driver_free_time = datetime_to_seconds(datetime.datetime.now())
         return self.driver_free_time + self.buffer_request_time + distance_in_meters(self.location,
@@ -205,7 +205,7 @@ class Restaurant:
             # print(driver.status)
             # if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order or all_driver:
              if driver.status != DriverStatus.Got_Request:
-                drivers_dict[i] = driver.get_driver_access_time(self.location) + self.service_delay
+                drivers_dict[i] = driver.get_driver_reach_time(self.location) + self.service_delay
         list_of_indexed_driver_sorted = [i[0] for i in sorted(drivers_dict.items(), key=lambda x: x[1])]
         return [i for i in list_of_indexed_driver_sorted]
 
@@ -372,10 +372,10 @@ def manage_order_driver():
                     driver_first = restaurants[order.restaurant_index].list_of_drivers[drivers_of_restaurant[0]]
                     print(driver_first)
                     print("First Driver Free time ", str(datetime_from_timestamp(
-                        driver_first.get_driver_access_time(restaurants[order.restaurant_index].location))),
+                        driver_first.get_driver_reach_time(restaurants[order.restaurant_index].location))),
                           " Pickup Time " + str(
                               datetime_from_timestamp(order.pickup_time )))
-                    if driver_first.get_driver_access_time(restaurants[
+                    if driver_first.get_driver_reach_time(restaurants[
                                                                order.restaurant_index].location) < order.pickup_time :
                         th = threading.Thread(target=manage_order, args=(order,))
                         orders.remove(order)
