@@ -213,7 +213,7 @@ class Restaurant:
         write_in_food(20 * "==" + "\n")
         self.service_delay = restaurant_service_delay_time  # service delay in seconds
 
-    def give_all_drivers_sorted(self,order_id,all_driver=False):
+    def give_all_drivers_sorted(self,all_driver=False):
         drivers_dict = dict()
         for i, driver in enumerate(self.list_of_drivers):
             # print(driver.status)
@@ -342,11 +342,14 @@ def manage_order(order):
             # print(restaurants[order.restaurant_index].list_of_drivers[t_driver].status)
             # while restaurants[order.restaurant_index].list_of_drivers[t_driver].status!=DriverStatus.Idel:
             #     time.sleep(5)
-            is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
-            # logging.info()
-            if is_accepted:
-                driver_index = t_driver
-                break
+            if  restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list:
+                is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
+                # logging.info()
+                if is_accepted:
+                    driver_index = t_driver
+                    break
+                else:
+                    driver_black_list=[ restaurants[order.restaurant_index].list_of_drivers[t_driver].id]
     if driver_index == None:
         print("No Driver Accepted order of :" + str(order.id))
     else:
