@@ -204,8 +204,8 @@ class Restaurant:
         drivers_dict = dict()
         for i, driver in enumerate(self.list_of_drivers):
             # print(driver.status)
-            # if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order or all_driver:
-             if driver.status != DriverStatus.Got_Request:
+            if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order or all_driver:
+            # if driver.status != DriverStatus.Got_Request:
                 drivers_dict[i] = driver.get_driver_reach_time(self.location) + self.service_delay
         list_of_indexed_driver_sorted = [i[0] for i in sorted(drivers_dict.items(), key=lambda x: x[1])]
         return [i for i in list_of_indexed_driver_sorted]
