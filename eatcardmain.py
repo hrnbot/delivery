@@ -15,7 +15,7 @@ orders = []
 global restaurants
 
 average_speed = 1  # m/s
-average_buffer_time = 240  # seconds
+average_buffer_time = 30  # seconds
 check_order_thresold = 3600  # 1hour
 all_threads = []
 driver_ping_display = 5
@@ -67,7 +67,7 @@ def distance_in_meters(location1, location2):
 class Food:
     def __init__(self, prep_time):
         self.id = names.get_last_name()
-        self.prep_time = prep_time * 60
+        self.prep_time = prep_time * 1
 
     def get_time(self):
         return self.prep_time
