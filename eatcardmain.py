@@ -131,10 +131,19 @@ class Driver:
         self.order_black_list=None
         self.order = None
 
+    def is_driver_reached(self):
+        if distance_in_meters(self.location,self.target_location)<=1:
+            return True
+        return False
+
+
     def driver_location_update(self):
         theta=math.atan2(self.target_location[0]-self.location[0],self.target_location[1]-self.location[1])
         theta*=(180/3.14)
-        self.location=(self.location[0]-math.sin(theta),self.location[1]-math.cosh(theta))
+        temp_location=(self.location[0]+math.sin(theta),self.location[1]+math.cos(theta))
+        if distance_in_meters(temp_location,self.target_location)<=1:
+            temp_location=self.target_location
+        self.location=temp_location
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
@@ -346,7 +355,7 @@ def manage_order(order):
                 driver_index].status == DriverStatus.Going_for_pickup:
                 logging.info(
                     "Pickup Time " + str(datetime_from_timestamp(order.pickup_time)) + str(datetime.datetime.now()))
-                while (order.pickup_time >= datetime_to_seconds(datetime.datetime.now())):
+                while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached:
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
                     time.sleep(1)
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
@@ -355,8 +364,10 @@ def manage_order(order):
                     datetime.datetime.now())) + str(datetime_from_timestamp(
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)) + str(
                     datetime.datetime.now()))
-                while (restaurants[order.restaurant_index].list_of_drivers[
-                           driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now())):
+                while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached:
+
+                # while (restaurants[order.restaurant_index].list_of_drivers[
+                #            driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now())):
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
                     time.sleep(1)
                     # logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Delivery Time "+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)))
