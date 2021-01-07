@@ -20,18 +20,18 @@ check_order_thresold = 3600  # 1hour
 all_threads = []
 driver_ping_display = 5
 manage_order_time = 5
-driver_reach_early_time =120
+driver_reach_early_time =60
 number_of_driver=4
 number_of_restaurant=5
 driver_buffer_request_time=30
 driver_rest_time=30
 restaurant_service_delay_time=30
 accept_request_probability=50
-request_accept_time=(0,120)
+request_accept_time=(0,20)
 food_prep_time=(100,250)
 number_of_food_items_per_restaurant=(5,8)
-driver_location=(0,200)
-restaurant_location=(0,200)
+driver_location=(0,100)
+restaurant_location=(0,100)
 
 def get_request_accept_time():
     return random.randint(request_accept_time[0],request_accept_time[1])
@@ -116,7 +116,6 @@ class DriverStatus(enum.Enum):
     Picked_up_order = 5
     Delivered = 6
 
-
 class Driver:
     def __init__(self, location=(0, 0), driver_speed=1):
         self.id = names.get_full_name()
@@ -129,6 +128,9 @@ class Driver:
         self.driver_rest_time =driver_rest_time
         # self.got_request=False
         self.order = None
+
+    # def driver_location_update(self):
+
 
     def request_for_food_delivery(self, order):
         if self.status==DriverStatus.Idel:
@@ -160,6 +162,7 @@ class Driver:
         return is_accepted
 
     def order_pickup(self):
+        self.location=self.order.delivery_location
         self.target_location = self.order.delivery_location
         self.status = DriverStatus.Picked_up_order
         self.driver_free_time = datetime_to_seconds(datetime.datetime.now()) + self.order.time_r2d
@@ -167,6 +170,7 @@ class Driver:
             datetime.datetime.now()) + " expected Delivery at " + str(datetime_from_timestamp(self.driver_free_time)))
 
     def order_delivered(self):
+        self.location = self.order.delivery_location
         self.target_location = None
         self.status = DriverStatus.Delivered
         self.status = DriverStatus.Idel
@@ -179,7 +183,6 @@ class Driver:
             self.driver_free_time = datetime_to_seconds(datetime.datetime.now())
         return self.driver_free_time + self.buffer_request_time + distance_in_meters(self.location,
                                                                                      target_location) / self.driver_speed
-
 
 class Restaurant:
     def __init__(self, list_of_foods, list_of_drivers, location):
@@ -199,10 +202,10 @@ class Restaurant:
     def give_all_drivers_sorted(self,all_driver=False):
         drivers_dict = dict()
         for i, driver in enumerate(self.list_of_drivers):
-            print(driver.status)
-            if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order or all_driver:
+            # print(driver.status)
+            # if driver.status == DriverStatus.Idel or driver.status == DriverStatus.Picked_up_order or all_driver:
+             if driver.status != DriverStatus.Got_Request:
                 drivers_dict[i] = driver.get_driver_access_time(self.location) + self.service_delay
-        # print("All Driver ",drivers_dict)
         list_of_indexed_driver_sorted = [i[0] for i in sorted(drivers_dict.items(), key=lambda x: x[1])]
         return [i for i in list_of_indexed_driver_sorted]
 
@@ -318,38 +321,42 @@ def manage_order(order):
     is_accepted = False
     driver_index = None
     drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
-    for t_driver in drivers_index:
-        # print(restaurants[order.restaurant_index].list_of_drivers[t_driver].status)
-        while restaurants[order.restaurant_index].list_of_drivers[t_driver].status!=DriverStatus.Idel:
-            time.sleep(5)
-        is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
-        # logging.info()
-        if is_accepted:
-            driver_index = t_driver
-            break
-    if driver_index == None:
-        print("No Driver Accepted order of :" + str(order.id))
-    else:
-        while (restaurants[order.restaurant_index].list_of_drivers[driver_index].status != DriverStatus.Idel):
-            if restaurants[order.restaurant_index].list_of_drivers[
-                driver_index].status == DriverStatus.Going_for_pickup:
-                logging.info(
-                    "Pickup Time " + str(datetime_from_timestamp(order.pickup_time)) + str(datetime.datetime.now()))
-                while (order.pickup_time >= datetime_to_seconds(datetime.datetime.now())):
-                    time.sleep(driver_ping_display)
-                restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
-                logging.info("Delivery Time " + str(restaurants[order.restaurant_index].list_of_drivers[
-                                                        driver_index].driver_free_time >= datetime_to_seconds(
-                    datetime.datetime.now())) + str(datetime_from_timestamp(
-                    restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)) + str(
-                    datetime.datetime.now()))
-                while (restaurants[order.restaurant_index].list_of_drivers[
-                           driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now())):
-                    time.sleep(driver_ping_display)
-                    # logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Delivery Time "+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)))
-                restaurants[order.restaurant_index].list_of_drivers[driver_index].order_delivered()
+
+    while not is_accepted:
+        drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
+        for t_driver in drivers_index:
+            # print(restaurants[order.restaurant_index].list_of_drivers[t_driver].status)
+            # while restaurants[order.restaurant_index].list_of_drivers[t_driver].status!=DriverStatus.Idel:
+            #     time.sleep(5)
+            is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(order)
+            # logging.info()
+            if is_accepted:
+                driver_index = t_driver
                 break
-            time.sleep(driver_ping_display)
+        if driver_index == None:
+            print("No Driver Accepted order of :" + str(order.id))
+        else:
+            while (restaurants[order.restaurant_index].list_of_drivers[driver_index].status != DriverStatus.Idel):
+                if restaurants[order.restaurant_index].list_of_drivers[
+                    driver_index].status == DriverStatus.Going_for_pickup:
+                    logging.info(
+                        "Pickup Time " + str(datetime_from_timestamp(order.pickup_time)) + str(datetime.datetime.now()))
+                    while (order.pickup_time >= datetime_to_seconds(datetime.datetime.now())):
+
+                        time.sleep(driver_ping_display)
+                    restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
+                    logging.info("Delivery Time " + str(restaurants[order.restaurant_index].list_of_drivers[
+                                                            driver_index].driver_free_time >= datetime_to_seconds(
+                        datetime.datetime.now())) + str(datetime_from_timestamp(
+                        restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)) + str(
+                        datetime.datetime.now()))
+                    while (restaurants[order.restaurant_index].list_of_drivers[
+                               driver_index].driver_free_time >= datetime_to_seconds(datetime.datetime.now())):
+                        time.sleep(driver_ping_display)
+                        # logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Delivery Time "+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)))
+                    restaurants[order.restaurant_index].list_of_drivers[driver_index].order_delivered()
+                    break
+                time.sleep(driver_ping_display)
 
 
 def manage_order_driver():
@@ -369,7 +376,7 @@ def manage_order_driver():
                           " Pickup Time " + str(
                               datetime_from_timestamp(order.pickup_time )))
                     if driver_first.get_driver_access_time(restaurants[
-                                                               order.restaurant_index].location) < order.pickup_time - driver_reach_early_time:
+                                                               order.restaurant_index].location) < order.pickup_time :
                         th = threading.Thread(target=manage_order, args=(order,))
                         orders.remove(order)
                         th.start()
