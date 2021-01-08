@@ -417,7 +417,7 @@ def manage_order(order):
                 logging.info(
                     "Pickup Time " + str(datetime_from_timestamp(order.pickup_time))+" Current Time"+ str(datetime.datetime.now()))
                 # print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
-                while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached():
+                while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached(True):
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
                     time.sleep(1)
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
