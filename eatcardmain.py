@@ -375,17 +375,26 @@ def create_Restaurants(number_of_restaurants, list_of_drivers):
     return [Restaurant(list_of_drivers=list_of_drivers, list_of_foods=create_foods(get_food_items()),
                        location=get_restaurant_location()) for i in range(number_of_restaurants)]
 
+def get_non_black_listed_sorted(restaurant_index,black_list):
+    indexes=restaurants[restaurant_index].give_all_drivers_sorted()
+    # new_indexes_of_driver=[]
+    for index in indexes:
+        if index not in black_list:
+            # new_indexes_of_driver.append(index)
+            return index
+    return None
 
 def manage_order(order):
     # print()
     is_accepted = False
     driver_index = None
-    drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
     driver_black_list = []
     while not is_accepted:
         # print(driver_black_list)
-        drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
-        for t_driver in drivers_index:
+        t_driver = get_non_black_listed_sorted(order.restaurant_index, driver_black_list)
+        # print(t_driver)
+        # for t_driver in drivers_index:
+        if t_driver != None:
             # print(restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list)
             if restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list:
                 is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(
@@ -398,7 +407,7 @@ def manage_order(order):
                     driver_black_list.append([restaurants[order.restaurant_index].list_of_drivers[t_driver].id])
                     if len(driver_black_list) >= len(
                         restaurants[order.restaurant_index].give_all_drivers_sorted()):
-                        is_accepted=True
+                        # is_accepted=True
                         break
     if driver_index == None:
         print("No Driver Accepted order of :" + str(order.id))
