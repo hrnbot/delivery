@@ -27,8 +27,8 @@ number_of_restaurant = 5
 driver_buffer_request_time = 30
 driver_rest_time = 30
 restaurant_service_delay_time = 30
-accept_request_probability = 70
-request_accept_time = (0, 60)
+accept_request_probability = 10
+request_accept_time = (0, 1)
 food_prep_time = (100, 250)
 number_of_food_items_per_restaurant = (5, 8)
 driver_location = (0, 100)
@@ -67,20 +67,17 @@ def get_first_driver_free_time(restaurant_index, target_location):
         drivers_of_restaurant = restaurants[restaurant_index].give_all_drivers_sorted(all_driver=True)
         driver_first = restaurants[restaurant_index].list_of_drivers[drivers_of_restaurant[0]]
         return driver_first.get_driver_reach_time(target_location) - datetime_to_seconds(datetime.datetime.now())
-
-
+#
+#
 def Add_order(order):
     global orders
     # orders.ap
-    print("SDfsdf")
     if len(orders) <= 0:
         orders.append(order)
     else:
         is_inserted = False
         for i in range(len(orders)):
-            print("Sdf", orders[i].pickup_time >= order.pickup_time, orders[i].pickup_time, order.pickup_time)
             if orders[i].pickup_time >= order.pickup_time:
-                print("In", i)
                 orders.insert(i, order)
                 is_inserted = True
                 break
@@ -155,7 +152,7 @@ class Driver:
             # theta*=(180/3.14)
             temp_location = (self.location[0] + math.sin(theta), self.location[1] + math.cos(theta))
         self.location = temp_location
-        print(temp_location,self.target_location,self.location)
+        # print(temp_location,self.target_location,self.location)
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
@@ -334,11 +331,9 @@ class Orders:
                 print(e)
         self.order_time = datetime.datetime.now()
 
-        print("DSfsd")
         self.pickup_time = self.expected_delivery_time - self.time_r2d - driver_reach_early_time
         # if self.pickup_time
         order_log += "Pickup time " + str(datetime_from_timestamp(self.pickup_time)) + "\n"
-        print("adf")
         # self.pickup_time=
         # self.predicted_delivery_time=
         print("pickup time", self.pickup_time, datetime_from_timestamp(self.pickup_time))
@@ -346,6 +341,11 @@ class Orders:
             restaurants[restaurant_index].list_of_foods[food_index].id) + " From Restaurant " + str(
             restaurants[restaurant_index].id) + " is Ordered at  " + str(self.order_time))
         write_in_order(order_log)
+        try:
+            write_in_separate_file(str(self.id),order_log)
+        except Exception as e:
+            print(e)
+
 
 
 def create_foods(number_of_foods):
@@ -371,6 +371,7 @@ def manage_order(order):
         print(driver_black_list)
         drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
         for t_driver in drivers_index:
+            print(restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list)
             if restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list:
                 is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(
                     order)
@@ -402,7 +403,6 @@ def manage_order(order):
                 # print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
                 while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached():
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
-                    # print("update")
                     time.sleep(1)
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
                 logging.info("Delivery Time " + str(restaurants[order.restaurant_index].list_of_drivers[
@@ -430,7 +430,7 @@ def manage_order_driver():
                 drivers_of_restaurant = restaurants[order.restaurant_index].give_all_drivers_sorted()
                 if len(drivers_of_restaurant) > 0:
                     driver_first = restaurants[order.restaurant_index].list_of_drivers[drivers_of_restaurant[0]]
-                    print(driver_first)
+                    # print(driver_first)
                     print("First Driver Free time ", str(datetime_from_timestamp(
                         driver_first.get_driver_reach_time(restaurants[order.restaurant_index].location))),
                           " Pickup Time " + str(
@@ -447,6 +447,10 @@ def manage_order_driver():
             time.sleep(1)
         time.sleep(manage_order_time)
 
+def write_in_separate_file(file_name,text):
+    f=open(file_name+".log","a+")
+    f.write(text+"\n")
+    f.close()
 
 def write_in_order(text):
     f = open("order.log", "a")
@@ -541,6 +545,7 @@ if __name__ == '__main__':
             input_key = input()
             if input_key == "1":
                 view_order()
+
     except KeyboardInterrupt:
         pass
     finally:
