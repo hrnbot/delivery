@@ -19,7 +19,7 @@ average_speed = 1.5  # m/s
 average_buffer_time = 30  # seconds
 check_order_thresold = 3600  # 1hour
 all_threads = []
-driver_ping_display = 5
+driver_ping_display = 1
 manage_order_time = 5
 driver_reach_early_time = 60
 number_of_driver = 4
@@ -141,7 +141,7 @@ class Driver:
     def is_driver_reached(self,check_food_prepared=False):
         if check_food_prepared and (datetime_to_seconds(datetime.datetime.now()) < self.orders[0].pickup_time):
             # print(str(self.orders[0])+"is prepared")
-            write_in_separate_file(str(self.orders[0])," waiting at restaurant")
+            write_in_separate_file(str(self.orders[0].id)," waiting at restaurant")
             return False
         if distance_in_meters(self.location, self.target_location) <= 1 :
             return True
@@ -432,7 +432,7 @@ def manage_order(order):
                     # logging.info("Driver "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].id)+" Order "+str(order.id)+" Status "+str(restaurants[order.restaurant_index].list_of_drivers[driver_index].status)+" Estimated Delivery Time "+str(datetime_from_timestamp(restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_free_time)))
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_delivered()
                 break
-            time.sleep(driver_ping_display)
+            time.sleep(0.5)
 
 
 def manage_order_driver():
@@ -460,8 +460,8 @@ def manage_order_driver():
                 else:
                     write_in_order("Finding Driver for your Order " + str(order.id))
 
-            time.sleep(1)
-        time.sleep(manage_order_time)
+            time.sleep(0.5)
+        time.sleep(0.5)
 
 def write_in_separate_file(file_name,text):
     f=open(file_name+".log","a+")
