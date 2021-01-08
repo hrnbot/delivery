@@ -140,6 +140,8 @@ class Driver:
 
     def is_driver_reached(self,check_food_prepared=False):
         if check_food_prepared and datetime_to_seconds(datetime.datetime.now) < self.orders[0].pickup_time():
+            print(str(self.orders[0])+"is prepared")
+            write_in_separate_file(str(self.orders[0]),str(self.orders[0])+"is prepared")
             return False
         if distance_in_meters(self.location, self.target_location) <= 1 :
             return True
