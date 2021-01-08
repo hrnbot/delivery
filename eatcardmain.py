@@ -156,7 +156,7 @@ class Driver:
             # theta*=(180/3.14)
             temp_location = (self.location[0] + math.sin(theta), self.location[1] + math.cos(theta))
         self.location = temp_location
-        write_in_separate_file(str(self.orders[0]),str(temp_location)+str(self.target_location))
+        write_in_separate_file(str(self.orders[0].id),str(temp_location)+str(self.target_location))
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
