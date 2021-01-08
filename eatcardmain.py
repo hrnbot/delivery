@@ -33,7 +33,7 @@ food_prep_time=(100,250)
 number_of_food_items_per_restaurant=(5,8)
 driver_location=(0,100)
 restaurant_location=(0,100)
-
+difference_in_distace=5
 def get_request_accept_time():
     return random.randint(request_accept_time[0],request_accept_time[1])
 
@@ -138,13 +138,15 @@ class Driver:
 
 
     def driver_location_update(self):
-        theta=math.atan2(self.target_location[0]-self.location[0],self.target_location[1]-self.location[1])
-        theta*=(180/3.14)
-        temp_location=(self.location[0]+math.cos(theta),self.location[1]+math.sin(theta))
-        if distance_in_meters(temp_location,self.target_location)<=1:
+        print("Distance",distance_in_meters(self.location,self.target_location))
+        if distance_in_meters(self.location,self.target_location)<=1:
             temp_location=self.target_location
+        else:
+            theta=math.atan2(self.target_location[0]-self.location[0],self.target_location[1]-self.location[1])
+            # theta*=(180/3.14)
+            temp_location=(self.location[0]+math.sin(theta),self.location[1]+math.cos(theta))
         self.location=temp_location
-        # print(temp_location,self.target_location,self.location)
+        print(temp_location,self.target_location,self.location)
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
@@ -196,8 +198,8 @@ class Driver:
     def get_driver_reach_time(self, target_location):
         if self.status == DriverStatus.Idel:
             self.driver_free_time = datetime_to_seconds(datetime.datetime.now())
-        return self.driver_free_time + self.buffer_request_time + distance_in_meters(self.location,
-                                                                                     target_location) / self.driver_speed
+        return self.driver_free_time + self.buffer_request_time + (distance_in_meters(self.location,
+                                                                                     target_location) / self.driver_speed)
 
 class Restaurant:
     def __init__(self, list_of_foods, list_of_drivers, location):
@@ -359,7 +361,7 @@ def manage_order(order):
                 driver_index].status == DriverStatus.Going_for_pickup:
                 logging.info(
                     "Pickup Time " + str(datetime_from_timestamp(order.pickup_time)) + str(datetime.datetime.now()))
-                # print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
+                print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
                 while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached():
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
                     # print("update")
