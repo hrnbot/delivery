@@ -404,7 +404,7 @@ def manage_order(order):
                     driver_index = t_driver
                     break
                 else:
-                    driver_black_list.append([restaurants[order.restaurant_index].list_of_drivers[t_driver].id])
+                    driver_black_list.append(t_driver)
                     if len(driver_black_list) >= len(
                         restaurants[order.restaurant_index].give_all_drivers_sorted()):
                         # is_accepted=True
