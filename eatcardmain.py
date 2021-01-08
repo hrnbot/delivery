@@ -140,8 +140,8 @@ class Driver:
 
     def is_driver_reached(self,check_food_prepared=False):
         if check_food_prepared and datetime_to_seconds(datetime.datetime.now) < self.orders[0].pickup_time():
-            print(str(self.orders[0])+"is prepared")
-            write_in_separate_file(str(self.orders[0]),str(self.orders[0])+"is prepared")
+            # print(str(self.orders[0])+"is prepared")
+            write_in_separate_file(str(self.orders[0])," waiting at restaurant")
             return False
         if distance_in_meters(self.location, self.target_location) <= 1 :
             return True
@@ -156,7 +156,7 @@ class Driver:
             # theta*=(180/3.14)
             temp_location = (self.location[0] + math.sin(theta), self.location[1] + math.cos(theta))
         self.location = temp_location
-        # print(temp_location,self.target_location,self.location)
+        write_in_separate_file(str(self.orders[0]),str(temp_location)+str(self.target_location))
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
@@ -407,8 +407,8 @@ def manage_order(order):
         write_in_separate_file(str(order.id),"No Driver Accepted order of :" + str(order.id))
     else:
         #     print(restaurants[order.restaurant_index].list_of_drivers[driver_index].status != DriverStatus.Idel)
-        print(restaurants[order.restaurant_index].list_of_drivers[driver_index].orders[0].id != order.id,
-              restaurants[order.restaurant_index].list_of_drivers[driver_index].orders[0].id, order.id)
+        # print(restaurants[order.restaurant_index].list_of_drivers[driver_index].orders[0].id != order.id,
+        #       restaurants[order.restaurant_index].list_of_drivers[driver_index].orders[0].id, order.id)
         while (restaurants[order.restaurant_index].list_of_drivers[driver_index].orders[0].id != order.id):
             time.sleep(2)
 
