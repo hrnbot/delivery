@@ -138,8 +138,10 @@ class Driver:
         # self.order_black_list=None
         self.orders = []
 
-    def is_driver_reached(self):
-        if distance_in_meters(self.location, self.target_location) <= 1:
+    def is_driver_reached(self,check_food_prepared=False):
+        if check_food_prepared and datetime_to_seconds(datetime.datetime.now) < self.orders[0].pickup_time():
+            return False
+        if distance_in_meters(self.location, self.target_location) <= 1 :
             return True
         return False
 
@@ -159,7 +161,10 @@ class Driver:
         if self.status == DriverStatus.Idel:
             self.status = DriverStatus.Got_Request
         logging.info(str(self.id) + " " + " got request of order " + str(order.id))
-        write_in_separate_file(str(order.id)+str(self.id) + " " + " got request of order " + str(order.id))
+        try:
+            write_in_separate_file(str(order.id),str(self.id) + " " + " got request of order " + str(order.id))
+        except Exception as e:
+            print(e)
         is_accepted = False
         # while (r_time > 0):
         wait_time = get_request_accept_time()
@@ -171,7 +176,7 @@ class Driver:
         logging.info(driver_key)
         if "a" in driver_key:
             logging.info(str(self.id) + " Driver accepted Order" + str(order.id))
-            write_in_separate_file(str(order.id)+str(self.id) + " Driver accepted Order" + str(order.id))
+            write_in_separate_file(str(order.id),str(self.id) + " Driver accepted Order" + str(order.id))
             is_accepted = True
             self.driver_free_time = self.get_driver_reach_time(restaurant_location) + order.time_r2d
             self.orders.append(order)
@@ -179,7 +184,7 @@ class Driver:
                 self.status = DriverStatus.Idel
         else:
             logging.info(str(self.id) + " Driver declined Order" + str(order.id))
-            write_in_separate_file(str(order.id)+str(self.id) + " Driver declined Order" + str(order.id))
+            write_in_separate_file(str(order.id),str(self.id) + " Driver declined Order" + str(order.id))
 
             if self.status == DriverStatus.Got_Request:
                 self.status = DriverStatus.Idel
@@ -190,7 +195,7 @@ class Driver:
     def serve_order(self):
         # print()
         logging.info(str(self.id) + " Driver serving Order" + str(self.orders[0].id))
-        write_in_separate_file(str(orders[0].id)+str(self.id) + " Driver serving Order" + str(self.orders[0].id))
+        write_in_separate_file(str(self.orders[0].id),str(self.id) + " Driver serving Order" + str(self.orders[0].id))
         self.target_location = self.orders[0].restaurant_location
         self.status = DriverStatus.Going_for_pickup
         # self.next_ping_time=get_driver_access_time(self.target_location)
@@ -202,7 +207,7 @@ class Driver:
         # self.driver_free_time = datetime_to_seconds(datetime.datetime.now()) + self.order[0].time_r2d
         logging.info("Driver " + str(self.id) + " Picked up Order " + str(self.orders[0].id) + " at " + str(
             datetime.datetime.now()) + " expected Delivery at " + str(datetime_from_timestamp(self.driver_free_time)))
-        write_in_separate_file( str(self.orders[0].id) +"Driver " + str(self.id) + " Picked up Order " + str(self.orders[0].id) + " at " + str(
+        write_in_separate_file( str(self.orders[0].id) ,"Driver " + str(self.id) + " Picked up Order " + str(self.orders[0].id) + " at " + str(
             datetime.datetime.now()) + " expected Delivery at " + str(datetime_from_timestamp(self.driver_free_time)))
 
 
@@ -215,7 +220,7 @@ class Driver:
         logging.info(
             "Driver " + str(self.id) + " Delivered Order " + str(self.orders[0].id) + " at " + str(
                 datetime.datetime.now()))
-        write_in_separate_file( str(self.orders[0].id)+"Driver " + str(self.id) + " Delivered Order " + str(self.orders[0].id) + " at " + str(
+        write_in_separate_file( str(self.orders[0].id),"Driver " + str(self.id) + " Delivered Order " + str(self.orders[0].id) + " at " + str(
                 datetime.datetime.now()))
         self.orders.pop(0)
 
@@ -410,7 +415,7 @@ def manage_order(order):
             if restaurants[order.restaurant_index].list_of_drivers[
                 driver_index].status == DriverStatus.Going_for_pickup:
                 logging.info(
-                    "Pickup Time " + str(datetime_from_timestamp(order.pickup_time)) + str(datetime.datetime.now()))
+                    "Pickup Time " + str(datetime_from_timestamp(order.pickup_time))+" Current Time"+ str(datetime.datetime.now()))
                 # print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
                 while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached():
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
@@ -442,7 +447,7 @@ def manage_order_driver():
                 if len(drivers_of_restaurant) > 0:
                     driver_first = restaurants[order.restaurant_index].list_of_drivers[drivers_of_restaurant[0]]
                     # print(driver_first)
-                    print("First Driver Free time ", str(datetime_from_timestamp(
+                    print("First Driver Reach to pickup time ", str(datetime_from_timestamp(
                         driver_first.get_driver_reach_time(restaurants[order.restaurant_index].location))),
                           " Pickup Time " + str(
                               datetime_from_timestamp(order.pickup_time)))
