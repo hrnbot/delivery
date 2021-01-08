@@ -27,8 +27,8 @@ number_of_restaurant = 5
 driver_buffer_request_time = 30
 driver_rest_time = 30
 restaurant_service_delay_time = 30
-accept_request_probability = 10
-request_accept_time = (0, 1)
+accept_request_probability = 50
+request_accept_time = (0, 20)
 food_prep_time = (100, 250)
 number_of_food_items_per_restaurant = (5, 8)
 driver_location = (0, 100)
@@ -363,8 +363,6 @@ class Orders:
         except Exception as e:
             print(e)
 
-
-
 def create_foods(number_of_foods):
     return [Food(get_food_prep_time()) for i in range(number_of_foods)]
 
@@ -385,10 +383,10 @@ def manage_order(order):
     drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
     driver_black_list = []
     while not is_accepted:
-        print(driver_black_list)
+        # print(driver_black_list)
         drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
         for t_driver in drivers_index:
-            print(restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list)
+            # print(restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list)
             if restaurants[order.restaurant_index].list_of_drivers[t_driver].id not in driver_black_list:
                 is_accepted = restaurants[order.restaurant_index].list_of_drivers[t_driver].request_for_food_delivery(
                     order)
