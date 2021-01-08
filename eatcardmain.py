@@ -140,7 +140,7 @@ class Driver:
     def driver_location_update(self):
         theta=math.atan2(self.target_location[0]-self.location[0],self.target_location[1]-self.location[1])
         theta*=(180/3.14)
-        temp_location=(self.location[0]+math.sin(theta),self.location[1]+math.cos(theta))
+        temp_location=(self.location[0]+math.cos(theta),self.location[1]+math.sin(theta))
         if distance_in_meters(temp_location,self.target_location)<=1:
             temp_location=self.target_location
         self.location=temp_location
@@ -362,7 +362,7 @@ def manage_order(order):
                 # print(restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached())
                 while not restaurants[order.restaurant_index].list_of_drivers[driver_index].is_driver_reached():
                     restaurants[order.restaurant_index].list_of_drivers[driver_index].driver_location_update()
-                    print("update")
+                    # print("update")
                     time.sleep(1)
                 restaurants[order.restaurant_index].list_of_drivers[driver_index].order_pickup()
                 logging.info("Delivery Time " + str(restaurants[order.restaurant_index].list_of_drivers[
