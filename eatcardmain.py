@@ -27,8 +27,8 @@ number_of_restaurant = 5
 driver_buffer_request_time = 30
 driver_rest_time = 30
 restaurant_service_delay_time = 30
-accept_request_probability = 100
-request_accept_time = (0, 20)
+accept_request_probability = 70
+request_accept_time = (0, 60)
 food_prep_time = (100, 250)
 number_of_food_items_per_restaurant = (5, 8)
 driver_location = (0, 100)
@@ -118,7 +118,6 @@ class Food:
     def get_time(self):
         return self.prep_time
 
-
 class DriverStatus(enum.Enum):
     Idel = 1
     Got_Request = 2
@@ -127,7 +126,6 @@ class DriverStatus(enum.Enum):
     Waiting_for_Food_prep = 4
     Picked_up_order = 5
     Delivered = 6
-
 
 class Driver:
     def __init__(self, location=(0, 0), driver_speed=1):
@@ -157,7 +155,7 @@ class Driver:
             # theta*=(180/3.14)
             temp_location = (self.location[0] + math.sin(theta), self.location[1] + math.cos(theta))
         self.location = temp_location
-        # print(temp_location,self.target_location,self.location)
+        print(temp_location,self.target_location,self.location)
         # write_in_driver()
 
     def request_for_food_delivery(self, order):
@@ -369,8 +367,7 @@ def manage_order(order):
     driver_index = None
     drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
     driver_black_list = []
-    while not is_accepted or len(driver_black_list) >= len(
-            restaurants[order.restaurant_index].give_all_drivers_sorted()):
+    while not is_accepted:
         print(driver_black_list)
         drivers_index = restaurants[order.restaurant_index].give_all_drivers_sorted()
         for t_driver in drivers_index:
@@ -382,7 +379,11 @@ def manage_order(order):
                     driver_index = t_driver
                     break
                 else:
-                    driver_black_list = [restaurants[order.restaurant_index].list_of_drivers[t_driver].id]
+                    driver_black_list.append([restaurants[order.restaurant_index].list_of_drivers[t_driver].id])
+                    if len(driver_black_list) >= len(
+                        restaurants[order.restaurant_index].give_all_drivers_sorted()):
+                        is_accepted=True
+                        break
     if driver_index == None:
         print("No Driver Accepted order of :" + str(order.id))
     else:
@@ -442,6 +443,7 @@ def manage_order_driver():
                         all_threads.append(th)
                 else:
                     write_in_order("Finding Driver for your Order " + str(order.id))
+
             time.sleep(1)
         time.sleep(manage_order_time)
 
