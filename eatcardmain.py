@@ -201,7 +201,7 @@ class Driver:
         self.orders.pop(0)
 
     def get_driver_reach_time(self, target_location):
-        if self.status == DriverStatus.Idel and len(self.orders)==0:
+        if (self.status == DriverStatus.Idel or self.status==DriverStatus.Got_Request)and len(self.orders)==0:
             self.driver_free_time = datetime_to_seconds(datetime.datetime.now())
             driver_last_location=self.location
         else:
