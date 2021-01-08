@@ -33,7 +33,7 @@ food_prep_time = (100, 250)
 number_of_food_items_per_restaurant = (5, 8)
 driver_location = (0, 100)
 restaurant_location = (0, 100)
-difference_in_distace = 1
+difference_in_distance = 1
 
 
 def get_request_accept_time():
@@ -139,7 +139,7 @@ class Driver:
         self.orders = []
 
     def is_driver_reached(self,check_food_prepared=False):
-        if check_food_prepared and datetime_to_seconds(datetime.datetime.now()) < self.orders[0].pickup_time():
+        if check_food_prepared and (datetime_to_seconds(datetime.datetime.now()) < self.orders[0].pickup_time):
             # print(str(self.orders[0])+"is prepared")
             write_in_separate_file(str(self.orders[0])," waiting at restaurant")
             return False
